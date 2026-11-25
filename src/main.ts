@@ -7,7 +7,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config: ConfigService = app.get(ConfigService);
-
+  app.enableCors({
+    origin: process.env.WHITE_LIST?.split(','),
+    credentials: true,
+  })
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const conf = new DocumentBuilder()
     .setTitle('Boiler plate swagger')
@@ -26,8 +29,7 @@ async function bootstrap() {
       'Authorization',
     )
     .addServer(
-      `/${
-        process.env.NODE_ENV === 'production' ? process.env.SERVICE_NAME : ''
+      `/${process.env.NODE_ENV === 'production' ? process.env.SERVICE_NAME : ''
       }`,
     )
     .build();
@@ -45,7 +47,7 @@ async function bootstrap() {
     );
     console.log(
       '\x1b[36m[SWAGGER]: ',
-      config.get<string>('BASE_URL') + config.get('PORT')+'/swagger',
+      config.get<string>('BASE_URL') + config.get('PORT') + '/swagger',
     );
   });
 }

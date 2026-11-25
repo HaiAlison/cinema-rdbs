@@ -1,7 +1,8 @@
 import { BaseTimeStampEntity } from 'src/utils/config/database/base-entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { MovieEntity } from './movie.entity';
 import { RoomEntity } from './room.entity';
+import { FormatEntity } from './format.entity';
 
 export enum EShowtimeStatus {
     UPCOMING = 'upcoming',
@@ -56,4 +57,7 @@ export class ShowtimeEntity extends BaseTimeStampEntity {
 
     @Column({ type: 'boolean', default: true })
     is_active: boolean;
+
+    @ManyToMany(() => FormatEntity, format => format.showtimes)
+    formats: FormatEntity[];
 }

@@ -1,5 +1,6 @@
 import { BaseTimeStampEntity } from "src/utils/config/database/base-entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, ManyToMany } from "typeorm";
+import { FormatEntity } from "./format.entity";
 
 @Entity('movie')
 export class MovieEntity extends BaseTimeStampEntity {
@@ -45,4 +46,7 @@ export class MovieEntity extends BaseTimeStampEntity {
 
     @Column({ type: 'varchar', nullable: true })
     poster_url?: string;
+
+    @ManyToMany(() => FormatEntity, format => format.movies)
+    formats: FormatEntity[];
 }

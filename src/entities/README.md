@@ -14,6 +14,7 @@ Thư mục này chứa toàn bộ **TypeORM entities** của hệ thống đặt
 | `cinema.entity.ts` | `CinemaEntity` | `cinema` | Cụm rạp chiếu phim |
 | `room.entity.ts` | `RoomEntity` | `room` | Phòng chiếu trong rạp |
 | `seat.entity.ts` | `SeatEntity` | `seat` | Ghế ngồi trong phòng chiếu |
+| `seat-type.entity.ts` | `SeatTypeEntity` | `seat_type` | Phân loại ghế (Standard, VIP, Sweetbox...) |
 | `showtime.entity.ts` | `ShowtimeEntity` | `showtime` | Suất chiếu |
 | `combo.entity.ts` | `ComboEntity` | `combo` | Bắp nước / Combo đồ ăn |
 | `promotion.entity.ts` | `PromotionEntity` | `promotion` | Khuyến mãi / Voucher |
@@ -37,9 +38,9 @@ Thư mục này chứa toàn bộ **TypeORM entities** của hệ thống đặt
                         │                └──1:N──┐
                         │                        │
                        N:1                  ┌──────────┐
-                        │                  │   Seat   │
-                  ┌───────────┐            └──────────┘
-                  │  Booking  │──1:N──────────────┘ (BookingDetail)
+                        │                   │   Seat   │──N:1──┌──────────┐
+                  ┌───────────┐             └──────────┘       │ SeatType │
+                  │  Booking  │──1:N──────────────┘ (BookingDetail) └──────────┘
                   └───────────┘
                    │   │   │
           ┌────────┘   │   └────────────────────────┐
@@ -126,17 +127,36 @@ Phòng chiếu trong một cụm rạp.
 
 ---
 
+### 🏷️ SeatTypeEntity
+Phân loại ghế ngồi trong rạp (Standard, VIP, Sweetbox, Deluxe...).
+
+**Enum `ESeatTypeCode`:** `standard` · `vip` · `sweetbox` · `deluxe`
+
+| Thuộc tính | Kiểu | Mô tả |
+|------------|------|-------|
+| `name` | `string` | Tên hiển thị (VD: Ghế thường, Ghế VIP) |
+| `code` | `ESeatTypeCode` | Mã loại ghế (unique) |
+| `surcharge` | `decimal` | Mức tiền phụ thu thêm theo loại ghế (VNĐ) |
+| `color` | `string?` | Mã màu HEX để hiển thị sơ đồ ghế |
+| `description` | `text?` | Mô tả chi tiết đặc quyền/đặc tính |
+| `is_active` | `boolean` | Đang áp dụng |
+| `seats` | `SeatEntity[]` | Danh sách ghế thuộc loại này |
+
+---
+
 ### 💺 SeatEntity
-Ghế ngồi trong phòng chiếu.
+Ghế ngồi vật lý trong phòng chiếu.
 
 | Thuộc tính | Kiểu | Mô tả |
 |------------|------|-------|
 | `room_id` | `string` | FK → Room |
-| `row` | `string` | Hàng (A, B, C...) |
-| `col` | `string` | Cột (01, 02...) |
-| `type` | `string` | Loại ghế (standard, vip, sweetbox, bed) |
-| `price` | `number` | Giá ghế |
-| `is_book` | `boolean` | Đã đặt chưa |
+| `seat_type_id` | `string` | FK → SeatType |
+| `row` | `string` | Hàng ghế (A, B, C...) |
+| `col` | `string` | Cột / Số ghế (01, 02...) |
+
+> **Lưu ý:** 
+> - Trạng thái đặt ghế không lưu trên `Seat` mà được xác định theo từng suất chiếu (`showtime_id`) thông qua bảng `booking_detail`.
+> - Giá phụ thu được tính từ `seat_type.surcharge` cộng vào giá suất chiếu (`showtime.base_price`).
 
 ---
 
