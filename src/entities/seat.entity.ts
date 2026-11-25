@@ -1,6 +1,7 @@
 import { BaseTimeStampEntity } from "src/utils/config/database/base-entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { RoomEntity } from "./room.entity";
+import { SeatTypeEntity } from "./seat-type.entity";
 
 @Entity('seat')
 export class SeatEntity extends BaseTimeStampEntity {
@@ -12,17 +13,15 @@ export class SeatEntity extends BaseTimeStampEntity {
     room: RoomEntity;
 
     @Column()
-    col: string;
+    seat_type_id: string;
 
-    @Column()
+    @ManyToOne(() => SeatTypeEntity, seatType => seatType.seats)
+    @JoinColumn({ name: 'seat_type_id' })
+    seatType: SeatTypeEntity;
+
+    @Column({ type: 'varchar', length: 10 })
     row: string;
 
-    @Column()
-    type: string;
-
-    @Column()
-    price: number;
-
-    @Column()
-    is_book: boolean;
+    @Column({ type: 'varchar', length: 10 })
+    col: string;
 }

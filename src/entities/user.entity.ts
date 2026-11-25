@@ -1,12 +1,21 @@
 import { BaseTimeStampEntity } from 'src/utils/config/database/base-entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 
+export enum EUserRole {
+    CUSTOMER = 'customer',
+    STAFF = 'staff',
+    ADMIN = 'admin'
+}
 
 @Entity('users')
+@Index('idx_users_code', ['code'])
 export class UserEntity extends BaseTimeStampEntity {
     @Column({ type: 'varchar', length: 100 })
     name: string;
+
+    @Column({ type: 'varchar', length: 100, unique: true })
+    code: string;
 
     @Column({ type: 'varchar', length: 100 })
     email: string;
@@ -35,4 +44,12 @@ export class UserEntity extends BaseTimeStampEntity {
     @Column({ type: 'boolean', default: true })
     is_active: boolean;
 
+    @Column({ type: 'enum', enum: EUserRole })
+    role: EUserRole
+
+    @Column({ type: 'varchar', length: 255, nullable: true, select: false })
+    refresh_token_hash?: string | null;
+
+    @Column({ type: 'timestamptz', nullable: true })
+    last_login?: Date | null;
 }

@@ -6,6 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmAsyncConfig } from './utils/config/database/config.service';
 import { join } from 'path';
 import { HeaderResolver, I18nModule } from 'nestjs-i18n';
+import { CinemaModule } from './cinema/cinema.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { MoviesModule } from './movies/movies.module';
 
 @Module({
   imports: [
@@ -20,6 +25,11 @@ import { HeaderResolver, I18nModule } from 'nestjs-i18n';
       },
       resolvers: [new HeaderResolver(['x-language'])],
     }),
+    AuthModule,
+    UsersModule,
+    CinemaModule,
+    RoomsModule,
+    MoviesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

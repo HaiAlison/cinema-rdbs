@@ -26,8 +26,8 @@ export const handleError = (e) => {
   if (new RegExp('violates not-null constraint').test(e.message)) {
     throw new HttpException(
       'column ' +
-        e.message.match(/".*"/)[0]?.replace(/"/g, '') +
-        ' can not be null',
+      e.message.match(/".*"/)[0]?.replace(/"/g, '') +
+      ' can not be null',
       HttpStatus.BAD_REQUEST,
       {
         cause: new Error(
@@ -66,7 +66,7 @@ export const removeUnicode = (str: string): string => {
   return str;
 };
 
-export const pagination = async (
+export const pagination = async<T>(
   query?: SelectQueryBuilder<any> | Repository<any>,
   options?: {
     limit?: number;
@@ -76,7 +76,7 @@ export const pagination = async (
   },
   findManyOptions?: FindManyOptions | FindOptionsWhere<any>,
   otherParams?: any,
-): Promise<PaginationResponse<any>> => {
+): Promise<PaginationResponse<T>> => {
   const {
     limit = DEFAULT_LIMIT_NUMBER,
     offset = DEFAULT_PAGE_NUMBER,
@@ -101,7 +101,7 @@ export const pagination = async (
       ...findManyOptions,
       take: limit,
       skip,
-      order:{}
+      order: {}
     });
   }
 
@@ -157,9 +157,9 @@ export const sendPost = async (method: Method, url, data, headers = {}) => {
 
 export const cleanObject = (originalObject = {}) => {
   const validArrays = pickBy(
-      originalObject,
-      (e) => Array.isArray(e) && e.length > 0,
-    ),
+    originalObject,
+    (e) => Array.isArray(e) && e.length > 0,
+  ),
     validObjects = pickBy(
       originalObject,
       (e) =>

@@ -30,9 +30,12 @@ export class RoomEntity extends BaseTimeStampEntity {
     @JoinColumn({ name: 'cinema_id' })
     cinema: CinemaEntity;
 
-    @Column({ type: 'enum', enum: ERoomType, nullable: false })
-    roomType: ERoomType;
+    @Column({ name: 'room_type', type: 'enum', enum: ERoomType, nullable: false })
+    room_type: ERoomType;
 
     @OneToMany(() => SeatEntity, seat => seat.room)
     seats: SeatEntity[];
+
+    @Column()
+    total_seats: number;
 }
