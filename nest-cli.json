@@ -8,6 +8,10 @@
       {
         "include": "utils/i18n/**/*",
         "watchAssets": true
+      },
+      {
+        "include": "bookings/ui/**/*",
+        "watchAssets": true
       }
     ]
   }
