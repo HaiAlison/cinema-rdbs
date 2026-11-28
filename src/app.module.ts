@@ -11,6 +11,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MoviesModule } from './movies/movies.module';
+import { BookingsModule } from './bookings/bookings.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { MoviesModule } from './movies/movies.module';
     CinemaModule,
     RoomsModule,
     MoviesModule,
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CGV Cinema — Quản lý Booking, Combo &amp; Payment (BTL2 - Thành viên 5)</title>
+  <style>
+    :root {
+      --cgv-red: #e71a0f;
+      --cgv-red-dark: #b8120a;
+      --bg: #f4f5f7;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --success-bg: #ecfdf5;
+      --success-text: #065f46;
+      --warning-bg: #fffbeb;
+      --warning-text: #92400e;
+      --danger-bg: #fef2f2;
+      --danger-text: #991b1b;
+      --info-bg: #eff6ff;
+      --info-text: #1e40af;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .topbar {
+      background: linear-gradient(135deg, #1a1a1d 0%, #2b1010 100%);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 3px solid var(--cgv-red);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-badge {
+      background: var(--cgv-red);
+      color: #fff;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .brand h1 { margin: 0; font-size: 18px; }
+    .brand p { margin: 2px 0 0; font-size: 12px; color: #d1d5db; }
+
+    .topbar-links { display: flex; align-items: center; gap: 10px; }
+    .pill-link {
+      color: #fff;
+      text-decoration: none;
+      font-size: 13px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+    }
+    .pill-link:hover { background: rgba(255,255,255,0.18); }
+
+    .container { max-width: 1360px; margin: 20px auto; padding: 0 18px 40px; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      background: var(--cgv-red);
+      color: #fff;
+      border-color: var(--cgv-red);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .card-title { margin: 0; font-size: 16px; font-weight: 700; }
+    .card-sub { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+
+    .grid-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    input[type="text"], input[type="number"], input[type="date"], input[type="datetime-local"], select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      background: #fff;
+      color: var(--text);
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--cgv-red);
+      box-shadow: 0 0 0 2px rgba(231, 26, 15, 0.14);
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--cgv-red); color: #fff; }
+    .btn-primary:hover { background: var(--cgv-red-dark); }
+    .btn-secondary { background: #e5e7eb; color: #111827; }
+    .btn-secondary:hover { background: #d1d5db; }
+    .btn-info { background: #2563eb; color: #fff; }
+    .btn-info:hover { background: #1d4ed8; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-sm { padding: 5px 9px; font-size: 12px; }
+
+    .alert {
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 14px;
+      display: none;
+      white-space: pre-wrap;
+    }
+    .alert.show { display: block; }
+    .alert-success { background: var(--success-bg); color: var(--success-text); border: 1px solid #a7f3d0; }
+    .alert-error { background: var(--danger-bg); color: var(--danger-text); border: 1px solid #fecaca; }
+    .alert-info { background: var(--info-bg); color: var(--info-text); border: 1px solid #bfdbfe; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td {
+      padding: 10px 9px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      background: #f9fafb;
+      font-weight: 700;
+      color: #374151;
+      white-space: nowrap;
+    }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { background: #f3f4f6; color: var(--cgv-red); }
+    tr:hover td { background: #fafafa; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-pending { background: var(--warning-bg); color: var(--warning-text); }
+    .badge-confirmed { background: var(--success-bg); color: var(--success-text); }
+    .badge-cancelled, .badge-expired { background: var(--danger-bg); color: var(--danger-text); }
+    .badge-refunded { background: var(--info-bg); color: var(--info-text); }
+
+    .money { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+    .actions { display: flex; gap: 6px; flex-wrap: nowrap; }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .kpi-box {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .kpi-label { font-size: 12px; color: var(--muted); }
+    .kpi-value { font-size: 20px; font-weight: 800; margin-top: 4px; color: #111827; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 780px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 20px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+    .modal-header h3 { margin: 0; font-size: 16px; }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .seat-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0;
+    }
+    .seat-chip {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #d1d5db;
+      cursor: pointer;
+    }
+    .seat-free { background: #ecfdf5; color: #065f46; border-color: #6ee7b7; }
+    .seat-occupied { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
+    .hidden { display: none !important; }
+    .hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-badge">CGV BTL2</div>
+      <div>
+        <h1>Quản lý Đặt vé, Bắp nước &amp; Thanh toán (Thành viên 5)</h1>
+        <p>Kết nối trực tiếp PostgreSQL Stored Procedures, Triggers &amp; Functions qua NestJS API</p>
+      </div>
+    </div>
+    <div class="topbar-links">
+      <a class="pill-link" href="/swagger" target="_blank">Mở Swagger API</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('bookings', this)">
+        1. Danh sách &amp; CRUD Đơn đặt vé (Mục 3.1 &amp; 3.2)
+      </button>
+      <button class="tab-btn" onclick="switchTab('revenue', this)">
+        2. Báo cáo Doanh thu Suất chiếu (SP 2.3 - Mục 3.3)
+      </button>
+      <button class="tab-btn" onclick="switchTab('analytics', this)">
+        3. Kiểm toán &amp; Đối soát Cursor (Functions 2.4 - Mục 3.3)
+      </button>
+    </div>
+
+    <div id="globalAlert" class="alert"></div>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: MỤC 3.1 & 3.2 - DANH SÁCH + SEARCH + FILTER + SORT + CRUD       -->
+    <!-- ===================================================================== -->
+    <section id="tab-bookings">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Tra cứu &amp; Lọc Đơn đặt vé (Gọi SP <code>sp_get_user_booking_history</code> qua REFCURSOR)</h2>
+            <p class="card-sub">Hỗ trợ tìm kiếm từ khóa, lọc theo khách hàng/trạng thái, sắp xếp cột, thêm/sửa/xóa qua Stored Procedure Mục 2.1</p>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateModal()">+ Tạo đơn đặt vé mới (Mục 3.1)</button>
+        </div>
+
+        <div class="grid-controls">
+          <div>
+            <label for="filterSearch">Tìm kiếm (Mã đơn / Tên khách / SĐT / Phim)</label>
+            <input id="filterSearch" type="text" placeholder="VD: CGV2026, Nguyễn Văn A..." />
+          </div>
+          <div>
+            <label for="filterUser">Khách hàng (WHERE user_id)</label>
+            <select id="filterUser">
+              <option value="">-- Tất cả khách hàng --</option>
+            </select>
+          </div>
+          <div>
+            <label for="filterStatus">Trạng thái (WHERE status)</label>
+            <select id="filterStatus">
+              <option value="">-- Tất cả trạng thái --</option>
+              <option value="pending">pending (Đang giữ chỗ)</option>
+              <option value="confirmed">confirmed (Đã thanh toán)</option>
+              <option value="cancelled">cancelled (Đã hủy)</option>
+              <option value="expired">expired (Hết hạn)</option>
+              <option value="refunded">refunded (Đã hoàn tiền)</option>
+            </select>
+          </div>
+          <div>
+            <label for="sortBy">Sắp xếp theo (ORDER BY)</label>
+            <select id="sortBy">
+              <option value="created_at">Ngày tạo</option>
+              <option value="final_amount">Thực thanh toán</option>
+              <option value="booking_code">Mã đặt vé</option>
+              <option value="show_time">Giờ chiếu</option>
+            </select>
+          </div>
+          <div>
+            <label for="sortDir">Thứ tự</label>
+            <select id="sortDir">
+              <option value="DESC">Giảm dần (DESC)</option>
+              <option value="ASC">Tăng dần (ASC)</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="loadBookings()">Tìm kiếm</button>
+            <button class="btn btn-secondary" onclick="resetBookingFilters()">Đặt lại</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="sortable" onclick="toggleSort('booking_code')">Mã đơn ↕</th>
+                <th>Khách hàng</th>
+                <th class="sortable" onclick="toggleSort('show_time')">Phim &amp; Suất chiếu ↕</th>
+                <th>Số ghế</th>
+                <th>Tiền vé</th>
+                <th>Combo</th>
+                <th>Giảm giá / KM</th>
+                <th class="sortable" onclick="toggleSort('final_amount')">Thực trả ↕</th>
+                <th>Điểm (Dùng/Tích)</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTbody">
+              <tr><td colspan="11">Đang tải dữ liệu từ PostgreSQL...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: MỤC 3.3 - BÁO CÁO DOANH THU SUẤT CHIẾU (SP 2.3.2)               -->
+    <!-- ===================================================================== -->
+    <section id="tab-revenue" class="hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Báo cáo Doanh thu theo Suất chiếu (<code>sp_report_showtime_revenue</code>)</h2>
+            <p class="card-sub">Join 5 bảng + COUNT, SUM, AVG + WHERE, GROUP BY, HAVING SUM &gt;= min_revenue, ORDER BY</p>
+          </div>
+        </div>
+
+        <div class="grid-controls">
+          <div>
+            <label for="revFromDate">Từ ngày chiếu (WHERE start_time &gt;=)</label>
+            <input id="revFromDate" type="date" value="2024-01-01" />
+          </div>
+          <div>
+            <label for="revToDate">Đến ngày chiếu (WHERE start_time &lt;=)</label>
+            <input id="revToDate" type="date" value="2027-12-31" />
+          </div>
+          <div>
+            <label for="revMinRevenue">Doanh thu tối thiểu (HAVING SUM &gt;=)</label>
+            <input id="revMinRevenue" type="number" min="0" step="10000" value="0" />
+          </div>
+          <div>
+            <label for="revMovieName">Tên phim (WHERE ILIKE)</label>
+            <input id="revMovieName" type="text" placeholder="VD: Avengers, Lật Mặt..." />
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="loadShowtimeRevenue()">Chạy báo cáo (SP)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-grid" id="revenueKpis"></div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Phim</th>
+                <th>Rạp &amp; Phòng</th>
+                <th>Giờ chiếu</th>
+                <th>Số đơn</th>
+                <th>Doanh thu vé</th>
+                <th>Doanh thu combo</th>
+                <th>Tổng giảm giá</th>
+                <th>Tổng doanh thu</th>
+                <th>TB / đơn</th>
+              </tr>
+            </thead>
+            <tbody id="revenueTbody">
+              <tr><td colspan="9">Nhấn "Chạy báo cáo (SP)" để lấy dữ liệu.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: MỤC 3.3 - FUNCTIONS CURSOR + LOOP + IF (MỤC 2.4)               -->
+    <!-- ===================================================================== -->
+    <section id="tab-analytics" class="hidden">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Function 2.4.1: Kiểm toán Hiệu quả Khuyến mãi (<code>fn_audit_promotion_discount_impact</code>)</h2>
+            <p class="card-sub">Dùng CURSOR + LOOP + IF duyệt từng đơn áp mã, phân tách đơn confirmed vs pending và tính doanh thu thực thu</p>
+          </div>
+        </div>
+        <div class="grid-controls">
+          <div>
+            <label for="auditPromoId">Chương trình khuyến mãi</label>
+            <select id="auditPromoId"></select>
+          </div>
+          <div>
+            <label for="auditMinOrder">Ngưỡng đơn tối thiểu (VNĐ)</label>
+            <input id="auditMinOrder" type="number" min="0" step="10000" value="0" />
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="runAuditPromotion()">Chạy kiểm toán (Function)</button>
+          </div>
+        </div>
+        <div id="auditResult" style="margin-top:16px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Function 2.4.2: Đối soát Tài chính Booking vs Payment theo Ngày (<code>fn_reconcile_daily_booking_payments</code>)</h2>
+            <p class="card-sub">Dùng CURSOR + LOOP + IF quét toàn bộ đơn trong ngày, phát hiện lệch tiền giữa bảng booking và payment</p>
+          </div>
+        </div>
+        <div class="grid-controls">
+          <div>
+            <label for="reconcileDate">Ngày cần đối soát (Calendar Picker)</label>
+            <input id="reconcileDate" type="date" value="2026-11-02" />
+          </div>
+          <div>
+            <label for="reconcileTolerance">Sai số cho phép (VNĐ)</label>
+            <input id="reconcileTolerance" type="number" min="0" step="0.01" value="0.01" />
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="runReconcileDaily()">Đối soát theo ngày (Function)</button>
+          </div>
+        </div>
+        <div id="reconcileResult" style="margin-top:16px;"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL TẠO ĐƠN MỚI (MỤC 3.1 - CALL sp_insert_booking)                    -->
+  <!-- ======================================================================= -->
+  <div id="createModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Tạo Đơn Đặt Vé Mới (<code>CALL sp_insert_booking</code>)</h3>
+        <button class="close-btn" onclick="closeModal('createModal')">&times;</button>
+      </div>
+      <div id="createAlert" class="alert"></div>
+      <form id="createForm" onsubmit="submitCreateBooking(event)">
+        <div class="form-grid">
+          <div>
+            <label for="cCode">Mã đặt vé *</label>
+            <div style="display:flex; gap:6px;">
+              <input id="cCode" type="text" required placeholder="VD: CGV2026000099" />
+              <button type="button" class="btn btn-secondary btn-sm" onclick="generateBookingCode()">Sinh mã</button>
+            </div>
+          </div>
+          <div>
+            <label for="cUser">Khách hàng *</label>
+            <select id="cUser" required></select>
+          </div>
+          <div>
+            <label for="cShowtime">Suất chiếu *</label>
+            <select id="cShowtime" required></select>
+            <div class="hint">Lưu ý: SP chặn tạo đơn nếu suất chiếu nằm trong quá khứ (test validation).</div>
+          </div>
+          <div>
+            <label for="cTicketTotal">Tổng tiền vé (VNĐ) *</label>
+            <input id="cTicketTotal" type="number" step="1000" value="180000" required />
+          </div>
+          <div>
+            <label for="cComboTotal">Tổng tiền combo (VNĐ)</label>
+            <input id="cComboTotal" type="number" step="1000" value="89000" />
+          </div>
+          <div>
+            <label for="cPromo">Mã khuyến mãi (tùy chọn)</label>
+            <select id="cPromo">
+              <option value="">-- Không áp dụng mã --</option>
+            </select>
+          </div>
+          <div>
+            <label for="cDiscount">Số tiền giảm (0 = tự tính theo mã)</label>
+            <input id="cDiscount" type="number" step="1000" value="0" />
+          </div>
+          <div>
+            <label for="cPointsUsed">Điểm CGV sử dụng (1 điểm = 1.000đ)</label>
+            <input id="cPointsUsed" type="number" step="1" value="0" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('createModal')">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu qua sp_insert_booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL CẬP NHẬT ĐƠN (MỤC 3.1 & 3.2 - CALL sp_update_booking)             -->
+  <!-- ======================================================================= -->
+  <div id="updateModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Cập Nhật Đơn Đặt Vé (<code>CALL sp_update_booking</code>)</h3>
+        <button class="close-btn" onclick="closeModal('updateModal')">&times;</button>
+      </div>
+      <div id="updateAlert" class="alert"></div>
+      <form id="updateForm" onsubmit="submitUpdateBooking(event)">
+        <input type="hidden" id="uId" />
+        <div class="form-grid">
+          <div>
+            <label>Mã đặt vé</label>
+            <input id="uCode" type="text" disabled />
+          </div>
+          <div>
+            <label for="uStatus">Trạng thái mới</label>
+            <select id="uStatus">
+              <option value="pending">pending (Đang giữ chỗ)</option>
+              <option value="confirmed">confirmed (Đã thanh toán)</option>
+              <option value="cancelled">cancelled (Đã hủy)</option>
+              <option value="expired">expired (Hết hạn)</option>
+              <option value="refunded">refunded (Hoàn tiền)</option>
+            </select>
+            <div class="hint">SP kiểm tra State Machine: không cho confirmed -&gt; cancelled hoặc về pending.</div>
+          </div>
+          <div>
+            <label for="uPromo">Đổi mã khuyến mãi (chỉ khi pending)</label>
+            <select id="uPromo">
+              <option value="">-- Giữ nguyên --</option>
+            </select>
+          </div>
+          <div>
+            <label for="uDiscount">Số tiền giảm mới (VNĐ, để trống = giữ nguyên)</label>
+            <input id="uDiscount" type="number" step="1000" placeholder="Để trống nếu không đổi" />
+          </div>
+          <div>
+            <label for="uPointsUsed">Điểm sử dụng mới (để trống = giữ nguyên)</label>
+            <input id="uPointsUsed" type="number" step="1" placeholder="Để trống nếu không đổi" />
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; padding-top:18px;">
+            <input id="uClearPromo" type="checkbox" style="width:auto;" />
+            <label for="uClearPromo" style="margin:0;">Gỡ bỏ mã khuyến mãi hiện tại</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('updateModal')">Đóng</button>
+          <button type="submit" class="btn btn-primary">Cập nhật qua sp_update_booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL CHI TIẾT ĐƠN: GHẾ, COMBO & THANH TOÁN (DEMO LIVE TRIGGERS 2.2)   -->
+  <!-- ======================================================================= -->
+  <div id="detailModal" class="modal-backdrop">
+    <div class="modal" style="max-width: 920px;">
+      <div class="modal-header">
+        <h3 id="detailTitle">Chi tiết Đơn đặt vé &amp; Demo Trigger</h3>
+        <button class="close-btn" onclick="closeModal('detailModal')">&times;</button>
+      </div>
+      <div id="detailAlert" class="alert"></div>
+      <div id="detailBody">Đang tải...</div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      lookups: { users: [], showtimes: [], promotions: [], combos: [] },
+      bookings: [],
+      currentDetailId: null,
+    };
+
+    function escapeHtml(val) {
+      if (val === null || val === undefined) return '';
+      return String(val)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatMoney(n) {
+      return Number(n || 0).toLocaleString('vi-VN') + ' đ';
+    }
+
+    function formatDateTime(dt) {
+      if (!dt) return '-';
+      const d = new Date(dt);
+      if (Number.isNaN(d.getTime())) return String(dt);
+      return d.toLocaleString('vi-VN');
+    }
+
+    function showAlert(elId, type, message) {
+      const el = document.getElementById(elId);
+      el.className = `alert show alert-${type}`;
+      el.textContent = message;
+    }
+
+    function hideAlert(elId) {
+      const el = document.getElementById(elId);
+      el.className = 'alert';
+      el.textContent = '';
+    }
+
+    async function apiFetch(url, options = {}) {
+      const res = await fetch(url, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = Array.isArray(data.message)
+          ? data.message.join('\n')
+          : data.message || `Lỗi HTTP ${res.status}`;
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function switchTab(tabName, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      ['bookings', 'revenue', 'analytics'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tabName);
+      });
+      hideAlert('globalAlert');
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    async function loadLookups() {
+      const data = await apiFetch('/bookings/procedure/lookups');
+      state.lookups = data;
+
+      // Dropdown lọc User
+      const filterUser = document.getElementById('filterUser');
+      filterUser.innerHTML = '<option value="">-- Tất cả khách hàng --</option>' +
+        data.users.map(u => `<option value="${escapeHtml(u.id)}">${escapeHtml(u.name)} (${escapeHtml(u.code)} - ${u.cgv_points} đ)</option>`).join('');
+
+      // Dropdown tạo booking: User
+      document.getElementById('cUser').innerHTML =
+        data.users.map(u => `<option value="${escapeHtml(u.id)}">${escapeHtml(u.name)} (Điểm: ${u.cgv_points})</option>`).join('');
+
+      // Dropdown tạo booking: Showtime
+      document.getElementById('cShowtime').innerHTML =
+        data.showtimes.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.movie_title)} | ${escapeHtml(s.cinema_name)} - ${escapeHtml(s.room_name)} | ${formatDateTime(s.start_time)}</option>`).join('');
+
+      // Dropdown Promotion
+      const promoOptions = data.promotions
+        .map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.code || p.name)} (${p.is_active ? 'Active' : 'Ngưng'} - ${escapeHtml(p.type)} ${Number(p.discount_value)})</option>`)
+        .join('');
+
+      document.getElementById('cPromo').innerHTML = '<option value="">-- Không áp dụng mã --</option>' + promoOptions;
+      document.getElementById('uPromo').innerHTML = '<option value="">-- Giữ nguyên --</option>' + promoOptions;
+      document.getElementById('auditPromoId').innerHTML = promoOptions;
+    }
+
+    async function loadBookings() {
+      hideAlert('globalAlert');
+      const params = new URLSearchParams();
+      const search = document.getElementById('filterSearch').value.trim();
+      const userId = document.getElementById('filterUser').value;
+      const status = document.getElementById('filterStatus').value;
+      const sortBy = document.getElementById('sortBy').value;
+      const sortDir = document.getElementById('sortDir').value;
+
+      if (search) params.set('search', search);
+      if (userId) params.set('user_id', userId);
+      if (status) params.set('status', status);
+      if (sortBy) params.set('sort_by', sortBy);
+      if (sortDir) params.set('sort_dir', sortDir);
+
+      try {
+        const rows = await apiFetch('/bookings/procedure/list?' + params.toString());
+        state.bookings = rows;
+        renderBookingsTable(rows);
+      } catch (err) {
+        showAlert('globalAlert', 'error', err.message);
+      }
+    }
+
+    function renderBookingsTable(rows) {
+      const tbody = document.getElementById('bookingsTbody');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="11">Không tìm thấy đơn đặt vé nào phù hợp điều kiện lọc.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(b => `
+        <tr>
+          <td><strong>${escapeHtml(b.booking_code)}</strong><div class="hint">${formatDateTime(b.created_at)}</div></td>
+          <td>${escapeHtml(b.customer_name)}<div class="hint">${escapeHtml(b.customer_phone)}</div></td>
+          <td><strong>${escapeHtml(b.movie_title)}</strong><div class="hint">${formatDateTime(b.show_time)}</div></td>
+          <td>${b.seat_count} ghế</td>
+          <td class="money">${formatMoney(b.ticket_total)}</td>
+          <td class="money">${formatMoney(b.combo_total)}</td>
+          <td class="money">-${formatMoney(b.discount_amount)}${b.promotion_code ? `<div class="hint">${escapeHtml(b.promotion_code)}</div>` : ''}</td>
+          <td class="money" style="color:var(--cgv-red)">${formatMoney(b.final_amount)}</td>
+          <td>-${b.points_used} / +${b.points_earned}</td>
+          <td><span class="badge badge-${escapeHtml(b.status)}">${escapeHtml(b.status)}</span></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-info btn-sm" onclick="openDetailModal('${escapeHtml(b.id)}')">Chi tiết</button>
+              <button class="btn btn-secondary btn-sm" onclick="openUpdateModal('${escapeHtml(b.id)}')">Sửa</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteBooking('${escapeHtml(b.id)}', '${escapeHtml(b.booking_code)}')">Xóa</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function toggleSort(col) {
+      const sortByEl = document.getElementById('sortBy');
+      const sortDirEl = document.getElementById('sortDir');
+      if (sortByEl.value === col) {
+        sortDirEl.value = sortDirEl.value === 'DESC' ? 'ASC' : 'DESC';
+      } else {
+        sortByEl.value = col;
+        sortDirEl.value = 'DESC';
+      }
+      loadBookings();
+    }
+
+    function resetBookingFilters() {
+      document.getElementById('filterSearch').value = '';
+      document.getElementById('filterUser').value = '';
+      document.getElementById('filterStatus').value = '';
+      document.getElementById('sortBy').value = 'created_at';
+      document.getElementById('sortDir').value = 'DESC';
+      loadBookings();
+    }
+
+    function generateBookingCode() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      document.getElementById('cCode').value =
+        `CGV${now.getFullYear()}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    }
+
+    function openCreateModal() {
+      hideAlert('createAlert');
+      generateBookingCode();
+      openModal('createModal');
+    }
+
+    async function submitCreateBooking(e) {
+      e.preventDefault();
+      hideAlert('createAlert');
+
+      const bookingCode = document.getElementById('cCode').value.trim();
+      const ticketTotal = Number(document.getElementById('cTicketTotal').value);
+      const comboTotal = Number(document.getElementById('cComboTotal').value || 0);
+      const discountAmount = Number(document.getElementById('cDiscount').value || 0);
+      const pointsUsed = Number(document.getElementById('cPointsUsed').value || 0);
+
+      // Client-side validation
+      if (bookingCode.length < 3) {
+        return showAlert('createAlert', 'error', 'Validation UI: Mã đặt vé phải có ít nhất 3 ký tự!');
+      }
+      if (ticketTotal < 0 || comboTotal < 0 || discountAmount < 0 || pointsUsed < 0) {
+        return showAlert('createAlert', 'error', 'Validation UI: Các giá trị tiền và điểm không được là số âm!');
+      }
+
+      const payload = {
+        booking_code: bookingCode,
+        user_id: document.getElementById('cUser').value,
+        showtime_id: document.getElementById('cShowtime').value,
+        ticket_total: ticketTotal,
+        combo_total: comboTotal,
+        discount_amount: discountAmount,
+        promotion_id: document.getElementById('cPromo').value || undefined,
+        points_used: pointsUsed,
+      };
+
+      try {
+        const res = await apiFetch('/bookings/procedure/create', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        closeModal('createModal');
+        showAlert('globalAlert', 'success', res.message + (res.bookingId ? ` (ID: ${res.bookingId})` : ''));
+        await loadBookings();
+      } catch (err) {
+        showAlert('createAlert', 'error', err.message);
+      }
+    }
+
+    function openUpdateModal(id) {
+      const b = state.bookings.find(item => item.id === id);
+      if (!b) return;
+      hideAlert('updateAlert');
+      document.getElementById('uId').value = b.id;
+      document.getElementById('uCode').value = b.booking_code;
+      document.getElementById('uStatus').value = b.status;
+      document.getElementById('uPromo').value = '';
+      document.getElementById('uDiscount').value = '';
+      document.getElementById('uPointsUsed').value = '';
+      document.getElementById('uClearPromo').checked = false;
+      openModal('updateModal');
+    }
+
+    async function submitUpdateBooking(e) {
+      e.preventDefault();
+      hideAlert('updateAlert');
+
+      const id = document.getElementById('uId').value;
+      const discountRaw = document.getElementById('uDiscount').value;
+      const pointsRaw = document.getElementById('uPointsUsed').value;
+
+      if (discountRaw !== '' && Number(discountRaw) < 0) {
+        return showAlert('updateAlert', 'error', 'Validation UI: Số tiền giảm không được âm!');
+      }
+      if (pointsRaw !== '' && Number(pointsRaw) < 0) {
+        return showAlert('updateAlert', 'error', 'Validation UI: Điểm sử dụng không được âm!');
+      }
+
+      const payload = {
+        status: document.getElementById('uStatus').value,
+        promotion_id: document.getElementById('uPromo').value || undefined,
+        clear_promotion: document.getElementById('uClearPromo').checked,
+        discount_amount: discountRaw !== '' ? Number(discountRaw) : undefined,
+        points_used: pointsRaw !== '' ? Number(pointsRaw) : undefined,
+      };
+
+      try {
+        const res = await apiFetch(`/bookings/procedure/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify(payload),
+        });
+        closeModal('updateModal');
+        showAlert('globalAlert', 'success', res.message);
+        await loadBookings();
+      } catch (err) {
+        showAlert('updateAlert', 'error', err.message);
+      }
+    }
+
+    async function deleteBooking(id, code) {
+      hideAlert('globalAlert');
+      if (!confirm(`Bạn có chắc muốn xóa đơn đặt vé "${code}" qua Stored Procedure sp_delete_booking?`)) {
+        return;
+      }
+      try {
+        const res = await apiFetch(`/bookings/procedure/${id}`, { method: 'DELETE' });
+        showAlert('globalAlert', 'success', res.message);
+        await loadBookings();
+      } catch (err) {
+        showAlert('globalAlert', 'error', err.message);
+      }
+    }
+
+    async function openDetailModal(id) {
+      state.currentDetailId = id;
+      hideAlert('detailAlert');
+      document.getElementById('detailBody').innerHTML = 'Đang tải chi tiết đơn...';
+      openModal('detailModal');
+      await refreshDetailModal();
+    }
+
+    async function refreshDetailModal() {
+      const id = state.currentDetailId;
+      if (!id) return;
+      try {
+        const data = await apiFetch(`/bookings/procedure/${id}/details`);
+        const b = data.booking;
+        document.getElementById('detailTitle').textContent = `Chi tiết đơn ${b.booking_code} (${b.status})`;
+
+        const comboSelectOptions = state.lookups.combos
+          .filter(c => c.is_available)
+          .map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)} (${formatMoney(c.price)})</option>`)
+          .join('');
+
+        document.getElementById('detailBody').innerHTML = `
+          <div class="kpi-grid">
+            <div class="kpi-box"><div class="kpi-label">Tiền vé (B1)</div><div class="kpi-value">${formatMoney(b.ticket_total)}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Tiền combo (B2)</div><div class="kpi-value">${formatMoney(b.combo_total)}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Giảm giá &amp; Điểm</div><div class="kpi-value">-${formatMoney(Number(b.discount_amount) + Number(b.points_used) * 1000)}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Thực trả (A) | Điểm (C)</div><div class="kpi-value" style="color:var(--cgv-red)">${formatMoney(b.final_amount)} <span style="font-size:13px;color:var(--muted)">(+${b.points_earned}đ)</span></div></div>
+          </div>
+
+          <p><strong>Khách hàng:</strong> ${escapeHtml(b.customer_name)} (${escapeHtml(b.customer_phone)}) | <strong>Phim:</strong> ${escapeHtml(b.movie_title)} | <strong>Rạp:</strong> ${escapeHtml(b.cinema_name)} - ${escapeHtml(b.room_name)}</p>
+
+          <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+          <h4>1. Chọn ghế phòng ${escapeHtml(b.room_name)} (Demo Trigger 2.2.1 chống trùng ghế &amp; Trigger 2.2.2 tính ticket_total)</h4>
+          <p class="hint">Ghế xanh = Còn trống (click để thêm vào đơn). Ghế đỏ = Đã đặt/giữ chỗ (click để kiểm thử Trigger 2.2.1 chặn xung đột ghế).</p>
+          <div class="seat-grid">
+            ${data.roomSeats.map(s => `
+              <button type="button"
+                class="seat-chip ${s.is_occupied ? 'seat-occupied' : 'seat-free'}"
+                onclick="addSeat('${escapeHtml(s.id)}')">
+                ${escapeHtml(s.seat_label)} ${s.is_occupied ? '(Đã đặt)' : ''}
+              </button>
+            `).join('')}
+          </div>
+
+          <table>
+            <thead><tr><th>Ghế</th><th>Loại ghế</th><th>Giá vé</th><th>Trạng thái</th><th>QR</th><th>Xóa</th></tr></thead>
+            <tbody>
+              ${data.details.length ? data.details.map(d => `
+                <tr>
+                  <td><strong>${escapeHtml(d.seat_label)}</strong></td>
+                  <td>${escapeHtml(d.seat_type)}</td>
+                  <td class="money">${formatMoney(d.price)}</td>
+                  <td>${escapeHtml(d.status)}</td>
+                  <td><code>${escapeHtml(d.qr_code)}</code></td>
+                  <td><button class="btn btn-danger btn-sm" onclick="removeSeat('${escapeHtml(d.id)}')">Xóa ghế</button></td>
+                </tr>
+              `).join('') : '<tr><td colspan="6">Chưa có vé ghế nào trong đơn.</td></tr>'}
+            </tbody>
+          </table>
+
+          <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+          <h4>2. Mua kèm Bắp nước (Demo Trigger 2.2.2 tự động tính combo_total &amp; final_amount)</h4>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; align-items:end;">
+            <div style="min-width:240px; flex:1;">
+              <label for="addComboId">Chọn Combo</label>
+              <select id="addComboId">${comboSelectOptions}</select>
+            </div>
+            <div style="width:110px;">
+              <label for="addComboQty">Số lượng</label>
+              <input id="addComboQty" type="number" min="1" value="1" />
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addCombo()">+ Thêm Combo</button>
+          </div>
+          <table>
+            <thead><tr><th>Combo</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th><th>Xóa</th></tr></thead>
+            <tbody>
+              ${data.combos.length ? data.combos.map(c => `
+                <tr>
+                  <td>${escapeHtml(c.combo_name)}</td>
+                  <td>${c.quantity}</td>
+                  <td class="money">${formatMoney(c.unit_price)}</td>
+                  <td class="money">${formatMoney(c.subtotal)}</td>
+                  <td><button class="btn btn-danger btn-sm" onclick="removeCombo('${escapeHtml(c.id)}')">Xóa</button></td>
+                </tr>
+              `).join('') : '<tr><td colspan="5">Chưa có combo bắp nước nào.</td></tr>'}
+            </tbody>
+          </table>
+
+          <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;" />
+          <h4>3. Giao dịch Thanh toán (<code>payment</code>)</h4>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; align-items:end;">
+            <div>
+              <label for="payMethod">Phương thức</label>
+              <select id="payMethod">
+                <option value="momo">MoMo</option>
+                <option value="vnpay">VNPay</option>
+                <option value="zalopay">ZaloPay</option>
+                <option value="credit_card">Thẻ tín dụng</option>
+                <option value="banking">Chuyển khoản</option>
+                <option value="cash">Tiền mặt</option>
+              </select>
+            </div>
+            <div>
+              <label for="payAmount">Số tiền thanh toán</label>
+              <input id="payAmount" type="number" min="1" value="${Number(b.final_amount) > 0 ? Number(b.final_amount) : 1000}" />
+            </div>
+            <div>
+              <label for="payStatus">Trạng thái GD</label>
+              <select id="payStatus">
+                <option value="success">success (Xác nhận đơn)</option>
+                <option value="pending">pending</option>
+                <option value="failed">failed</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="submitPayment()">Thanh toán</button>
+          </div>
+          <table>
+            <thead><tr><th>Phương thức</th><th>Số tiền</th><th>Trạng thái</th><th>Mã GD</th><th>Thời gian TT</th></tr></thead>
+            <tbody>
+              ${data.payments.length ? data.payments.map(p => `
+                <tr>
+                  <td>${escapeHtml(p.method)}</td>
+                  <td class="money">${formatMoney(p.amount)}</td>
+                  <td>${escapeHtml(p.status)}</td>
+                  <td><code>${escapeHtml(p.transaction_id)}</code></td>
+                  <td>${formatDateTime(p.paid_at)}</td>
+                </tr>
+              `).join('') : '<tr><td colspan="5">Chưa có giao dịch thanh toán nào.</td></tr>'}
+            </tbody>
+          </table>
+        `;
+      } catch (err) {
+        showAlert('detailAlert', 'error', err.message);
+      }
+    }
+
+    async function addSeat(seatId) {
+      hideAlert('detailAlert');
+      try {
+        const res = await apiFetch(`/bookings/procedure/${state.currentDetailId}/seats`, {
+          method: 'POST',
+          body: JSON.stringify({ seat_id: seatId }),
+        });
+        showAlert('detailAlert', 'success', res.message);
+        await refreshDetailModal();
+        await loadBookings();
+      } catch (err) {
+        showAlert('detailAlert', 'error', err.message);
+      }
+    }
+
+    async function removeSeat(detailId) {
+      hideAlert('detailAlert');
+      try {
+        const res = await apiFetch(`/bookings/procedure/${state.currentDetailId}/seats/${detailId}`, {
+          method: 'DELETE',
+        });
+        showAlert('detailAlert', 'success', res.message);
+        await refreshDetailModal();
+        await loadBookings();
+      } catch (err) {
+        showAlert('detailAlert', 'error', err.message);
+      }
+    }
+
+    async function addCombo() {
+      hideAlert('detailAlert');
+      const comboId = document.getElementById('addComboId').value;
+      const quantity = Number(document.getElementById('addComboQty').value || 0);
+      if (quantity <= 0) {
+        return showAlert('detailAlert', 'error', 'Validation UI: Số lượng combo phải lớn hơn 0!');
+      }
+      try {
+        const res = await apiFetch(`/bookings/procedure/${state.currentDetailId}/combos`, {
+          method: 'POST',
+          body: JSON.stringify({ combo_id: comboId, quantity }),
+        });
+        showAlert('detailAlert', 'success', res.message);
+        await refreshDetailModal();
+        await loadBookings();
+      } catch (err) {
+        showAlert('detailAlert', 'error', err.message);
+      }
+    }
+
+    async function removeCombo(bookingComboId) {
+      hideAlert('detailAlert');
+      try {
+        const res = await apiFetch(`/bookings/procedure/${state.currentDetailId}/combos/${bookingComboId}`, {
+          method: 'DELETE',
+        });
+        showAlert('detailAlert', 'success', res.message);
+        await refreshDetailModal();
+        await loadBookings();
+      } catch (err) {
+        showAlert('detailAlert', 'error', err.message);
+      }
+    }
+
+    async function submitPayment() {
+      hideAlert('detailAlert');
+      const method = document.getElementById('payMethod').value;
+      const amount = Number(document.getElementById('payAmount').value || 0);
+      const status = document.getElementById('payStatus').value;
+      if (amount <= 0) {
+        return showAlert('detailAlert', 'error', 'Validation UI: Số tiền thanh toán phải lớn hơn 0!');
+      }
+      try {
+        const res = await apiFetch(`/bookings/procedure/${state.currentDetailId}/payments`, {
+          method: 'POST',
+          body: JSON.stringify({ method, amount, status }),
+        });
+        showAlert('detailAlert', 'success', res.message);
+        await refreshDetailModal();
+        await loadBookings();
+      } catch (err) {
+        showAlert('detailAlert', 'error', err.message);
+      }
+    }
+
+    async function loadShowtimeRevenue() {
+      hideAlert('globalAlert');
+      const fromDate = document.getElementById('revFromDate').value;
+      const toDate = document.getElementById('revToDate').value;
+      const minRev = document.getElementById('revMinRevenue').value || '0';
+      const movieName = document.getElementById('revMovieName').value.trim();
+
+      if (fromDate && toDate && fromDate > toDate) {
+        return showAlert('globalAlert', 'error', 'Validation UI: Từ ngày không được lớn hơn Đến ngày!');
+      }
+
+      const params = new URLSearchParams();
+      if (fromDate) params.set('from_date', `${fromDate}T00:00:00+07:00`);
+      if (toDate) params.set('to_date', `${toDate}T23:59:59+07:00`);
+      params.set('min_revenue', minRev);
+      if (movieName) params.set('movie_name', movieName);
+
+      try {
+        const rows = await apiFetch('/bookings/procedure/showtime-revenue?' + params.toString());
+        const totalOrders = rows.reduce((s, r) => s + Number(r.total_bookings || 0), 0);
+        const totalRev = rows.reduce((s, r) => s + Number(r.total_revenue || 0), 0);
+
+        document.getElementById('revenueKpis').innerHTML = `
+          <div class="kpi-box"><div class="kpi-label">Số suất chiếu đạt ngưỡng</div><div class="kpi-value">${rows.length}</div></div>
+          <div class="kpi-box"><div class="kpi-label">Tổng số đơn confirmed</div><div class="kpi-value">${totalOrders}</div></div>
+          <div class="kpi-box"><div class="kpi-label">Tổng doanh thu thực thu</div><div class="kpi-value" style="color:var(--cgv-red)">${formatMoney(totalRev)}</div></div>
+        `;
+
+        const tbody = document.getElementById('revenueTbody');
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="9">Không có suất chiếu nào đạt điều kiện HAVING/WHERE.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td><strong>${escapeHtml(r.movie_title)}</strong></td>
+            <td>${escapeHtml(r.cinema_name)}<div class="hint">${escapeHtml(r.room_name)}</div></td>
+            <td>${formatDateTime(r.start_time)}</td>
+            <td>${r.total_bookings}</td>
+            <td class="money">${formatMoney(r.total_ticket_revenue)}</td>
+            <td class="money">${formatMoney(r.total_combo_revenue)}</td>
+            <td class="money">-${formatMoney(r.total_discount)}</td>
+            <td class="money" style="color:var(--cgv-red)">${formatMoney(r.total_revenue)}</td>
+            <td class="money">${formatMoney(r.avg_order_value)}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        showAlert('globalAlert', 'error', err.message);
+      }
+    }
+
+    async function runAuditPromotion() {
+      hideAlert('globalAlert');
+      const promoId = document.getElementById('auditPromoId').value;
+      const minOrder = document.getElementById('auditMinOrder').value || '0';
+      if (!promoId) {
+        return showAlert('globalAlert', 'error', 'Vui lòng chọn chương trình khuyến mãi!');
+      }
+      try {
+        const res = await apiFetch(`/bookings/function/audit-promotion/${promoId}?min_booking_amount=${encodeURIComponent(minOrder)}`);
+        document.getElementById('auditResult').innerHTML = `
+          <div class="kpi-grid">
+            <div class="kpi-box"><div class="kpi-label">Mã khuyến mãi</div><div class="kpi-value">${escapeHtml(res.promotion_code)}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Đơn đã thanh toán / Chờ</div><div class="kpi-value">${res.confirmed_bookings_count} / ${res.pending_bookings_count}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Tổng giảm giá</div><div class="kpi-value">${formatMoney(res.total_discount_given)}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Doanh thu thực thu</div><div class="kpi-value" style="color:var(--cgv-red)">${formatMoney(res.total_net_collected)}</div></div>
+          </div>
+          <div class="alert show alert-info">${escapeHtml(res.audit_summary)}</div>
+        `;
+      } catch (err) {
+        showAlert('globalAlert', 'error', err.message);
+      }
+    }
+
+    async function runReconcileDaily() {
+      hideAlert('globalAlert');
+      const checkDate = document.getElementById('reconcileDate').value;
+      const tolerance = document.getElementById('reconcileTolerance').value || '0.01';
+      if (!checkDate) {
+        return showAlert('globalAlert', 'error', 'Vui lòng chọn ngày cần đối soát!');
+      }
+      try {
+        const res = await apiFetch(`/bookings/function/reconcile-daily?check_date=${encodeURIComponent(checkDate)}&tolerance=${encodeURIComponent(tolerance)}`);
+        const alertClass = Number(res.unbalanced_orders) === 0 ? 'alert-success' : 'alert-error';
+        document.getElementById('reconcileResult').innerHTML = `
+          <div class="kpi-grid">
+            <div class="kpi-box"><div class="kpi-label">Tổng số đơn trong ngày</div><div class="kpi-value">${res.total_orders}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Đơn khớp / Đơn lệch</div><div class="kpi-value">${res.balanced_orders} / <span style="color:${Number(res.unbalanced_orders) > 0 ? '#dc2626' : '#065f46'}">${res.unbalanced_orders}</span></div></div>
+            <div class="kpi-box"><div class="kpi-label">Doanh thu kỳ vọng (Booking)</div><div class="kpi-value">${formatMoney(res.total_expected_revenue)}</div></div>
+            <div class="kpi-box"><div class="kpi-label">Thực nhận (Payment)</div><div class="kpi-value" style="color:var(--cgv-red)">${formatMoney(res.total_actual_paid)}</div></div>
+          </div>
+          <div class="alert show ${alertClass}">${escapeHtml(res.reconcile_notes)}</div>
+        `;
+      } catch (err) {
+        showAlert('globalAlert', 'error', err.message);
+      }
+    }
+
+    (async function init() {
+      try {
+        await loadLookups();
+        await loadBookings();
+      } catch (err) {
+        showAlert('globalAlert', 'error', 'Không thể kết nối API / CSDL: ' + err.message);
+      }
+    })();
+  </script>
+</body>
+</html>
